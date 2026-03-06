@@ -21,9 +21,9 @@ You need to create 4 tables in the Data Store. Follow these steps for each table
 | Column Name | Type | Properties |
 |------|------|-----------|
 | id | Auto ID | Primary Key |
-| email | Text | Unique, Not Null |
-| password | Text | Not Null |
-| name | Text | Not Null |
+| email | text | Unique, Not Null |
+| password | text | Not Null |
+| name | text | Not Null |
 | created_at | DateTime | Not Null, Default: Current DateTime |
 
 4. Click **Create Table**
@@ -39,24 +39,24 @@ You need to create 4 tables in the Data Store. Follow these steps for each table
 | Column Name | Type | Properties |
 |------|------|-----------|
 | id | Auto ID | Primary Key |
-| patient_name | Text | Not Null |
-| status | Text | Not Null, Default: 'Open' |
-| order_type | Text | Not Null, Default: 'Stock' |
+| patient_name | text | Not Null |
+| status | text | Not Null, Default: 'Open' |
+| order_type | text | Not Null, Default: 'Stock' |
 | date_created | DateTime | Not Null, Default: Current DateTime |
 | due_date | DateTime | Not Null |
-| created_by | Number | (User ID) |
-| sph_od | Decimal | Allow Null |
-| cyl_od | Decimal | Allow Null |
-| axis_od | Number | Allow Null |
-| add_od | Decimal | Allow Null |
-| va_od | Text | Allow Null |
-| prism_bases_od | Text | Allow Null |
-| sph_os | Decimal | Allow Null |
-| cyl_os | Decimal | Allow Null |
-| axis_os | Number | Allow Null |
-| add_os | Decimal | Allow Null |
-| va_os | Text | Allow Null |
-| prism_bases_os | Text | Allow Null |
+| created_by | BigInt | Allow Null (User ID) |
+| sph_od | Double | Allow Null |
+| cyl_od | Double | Allow Null |
+| axis_od | Int | Allow Null |
+| add_od | Double | Allow Null |
+| va_od | text | Allow Null |
+| prism_bases_od | text | Allow Null |
+| sph_os | Double | Allow Null |
+| cyl_os | Double | Allow Null |
+| axis_os | Int | Allow Null |
+| add_os | Double | Allow Null |
+| va_os | text | Allow Null |
+| prism_bases_os | text | Allow Null |
 
 4. Click **Create Table**
 
@@ -71,9 +71,9 @@ You need to create 4 tables in the Data Store. Follow these steps for each table
 | Column Name | Type | Properties |
 |------|------|-----------|
 | id | Auto ID | Primary Key |
-| order_id | Number | Not Null |
-| user_id | Number | Not Null |
-| comment | Text | Not Null |
+| order_id | BigInt | Not Null |
+| user_id | BigInt | Not Null |
+| comment | text | Not Null |
 | created_at | DateTime | Not Null, Default: Current DateTime |
 
 4. Click **Create Table**
@@ -89,11 +89,11 @@ You need to create 4 tables in the Data Store. Follow these steps for each table
 | Column Name | Type | Properties |
 |------|------|-----------|
 | id | Auto ID | Primary Key |
-| order_id | Number | Not Null |
-| user_id | Number | Not Null |
-| field_name | Text | Not Null |
-| old_value | Text | Allow Null |
-| new_value | Text | Allow Null |
+| order_id | BigInt | Not Null |
+| user_id | BigInt | Not Null |
+| field_name | text | Not Null |
+| old_value | text | Allow Null |
+| new_value | text | Allow Null |
 | created_at | DateTime | Not Null, Default: Current DateTime |
 
 4. Click **Create Table**
