@@ -112,7 +112,10 @@ const OrderDetail = () => {
   };
 
   const downloadPDF = () => {
-    if (!orderInfoRef.current || !order) return;
+    if (!orderInfoRef.current || !order) {
+      console.error('Cannot download PDF: missing ref or order');
+      return;
+    }
 
     const element = orderInfoRef.current;
     const opt = {
@@ -123,6 +126,7 @@ const OrderDetail = () => {
       jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
     };
 
+    console.log('Generating PDF...');
     html2pdf().set(opt).from(element).save();
   };
 
