@@ -404,6 +404,7 @@ const OrderDetail = () => {
                 >
                   Cancel
                 </button>
+              </div>
             </form>
           ) : (
             <div className="space-y-4">
