@@ -123,7 +123,7 @@ const OrderDetail = () => {
       filename: `${order.patient_name}-Order-${order.id}.pdf`,
       image: { type: 'png' as const, quality: 0.98 },
       html2canvas: { scale: 2 },
-      jsPDF: { orientation: 'portrait' as const, unit: 'mm' as const, format: 'a5' as const }
+      jsPDF: { orientation: 'landscape' as const, unit: 'mm' as const, format: 'a5' as const }
     };
 
     console.log('Generating PDF...');
