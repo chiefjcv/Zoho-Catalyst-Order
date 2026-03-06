@@ -168,14 +168,14 @@ const OrderDetail = () => {
                 <>
                   <button
                     onClick={downloadPDF}
-                    className="text-green-600 hover:text-green-800 text-sm font-medium flex items-center gap-1"
+                    className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 text-sm font-medium flex items-center gap-1 transition-colors"
                     title="Download as PDF"
                   >
-                    📄 PDF
+                    📄 Download PDF
                   </button>
                   <button
                     onClick={() => setEditing(true)}
-                    className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 text-sm font-medium transition-colors"
                   >
                     Edit
                   </button>
