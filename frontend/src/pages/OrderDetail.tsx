@@ -119,11 +119,11 @@ const OrderDetail = () => {
 
     const element = orderInfoRef.current;
     const opt = {
-      margin: 3,
+      margin: 10,
       filename: `${order.patient_name}-Order-${order.id}.pdf`,
       image: { type: 'png' as const, quality: 0.98 },
-      html2canvas: { scale: 1.2 },
-      jsPDF: { orientation: 'landscape' as const, unit: 'mm' as const, format: 'a5' as const }
+      html2canvas: { scale: 2 },
+      jsPDF: { orientation: 'landscape' as const, unit: 'mm' as const, format: 'a4' as const }
     };
 
     console.log('Generating PDF...');
