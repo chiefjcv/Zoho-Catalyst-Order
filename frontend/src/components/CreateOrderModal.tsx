@@ -15,6 +15,22 @@ const CreateOrderModal = ({ onClose, onSuccess }: CreateOrderModalProps) => {
   const [orderType, setOrderType] = useState('Stock');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // OD (Right Eye)
+  const [sphOd, setSphOd] = useState('');
+  const [cylOd, setCylOd] = useState('');
+  const [axisOd, setAxisOd] = useState('');
+  const [addOd, setAddOd] = useState('');
+  const [vaOd, setVaOd] = useState('');
+  const [prismBasesOd, setPrismBasesOd] = useState('');
+  
+  // OS (Left Eye)
+  const [sphOs, setSphOs] = useState('');
+  const [cylOs, setCylOs] = useState('');
+  const [axisOs, setAxisOs] = useState('');
+  const [addOs, setAddOs] = useState('');
+  const [vaOs, setVaOs] = useState('');
+  const [prismBasesOs, setPrismBasesOs] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +43,19 @@ const CreateOrderModal = ({ onClose, onSuccess }: CreateOrderModalProps) => {
         patient_rx: patientRx,
         due_date: dueDate,
         status,
-        order_type: orderType
+        order_type: orderType,
+        sph_od: sphOd ? parseFloat(sphOd) : null,
+        cyl_od: cylOd ? parseFloat(cylOd) : null,
+        axis_od: axisOd ? parseInt(axisOd) : null,
+        add_od: addOd ? parseFloat(addOd) : null,
+        va_od: vaOd || null,
+        prism_bases_od: prismBasesOd || null,
+        sph_os: sphOs ? parseFloat(sphOs) : null,
+        cyl_os: cylOs ? parseFloat(cylOs) : null,
+        axis_os: axisOs ? parseInt(axisOs) : null,
+        add_os: addOs ? parseFloat(addOs) : null,
+        va_os: vaOs || null,
+        prism_bases_os: prismBasesOs || null
       });
       onSuccess();
     } catch (err: any) {
@@ -130,6 +158,148 @@ const CreateOrderModal = ({ onClose, onSuccess }: CreateOrderModalProps) => {
               <option value="Ready for Pickup">Ready for Pickup</option>
               <option value="Delivered">Delivered</option>
             </select>
+          </div>
+
+          <div className="border-t border-gray-300 pt-4">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Prescription - OD (Right Eye)</h3>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Sph</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={sphOd}
+                  onChange={(e) => setSphOd(e.target.value)}
+                  placeholder="Sphere"
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Cyl</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={cylOd}
+                  onChange={(e) => setCylOd(e.target.value)}
+                  placeholder="Cylinder"
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Axis</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="180"
+                  value={axisOd}
+                  onChange={(e) => setAxisOd(e.target.value)}
+                  placeholder="Axis"
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Add.</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={addOd}
+                  onChange={(e) => setAddOd(e.target.value)}
+                  placeholder="Addition"
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">VA</label>
+                <input
+                  type="text"
+                  value={vaOd}
+                  onChange={(e) => setVaOd(e.target.value)}
+                  placeholder="e.g. 6/12, N8"
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Prism Bases</label>
+                <input
+                  type="text"
+                  value={prismBasesOd}
+                  onChange={(e) => setPrismBasesOd(e.target.value)}
+                  placeholder="e.g. 6/12, N8"
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-300 pt-4">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Prescription - OS (Left Eye)</h3>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Sph</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={sphOs}
+                  onChange={(e) => setSphOs(e.target.value)}
+                  placeholder="Sphere"
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Cyl</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={cylOs}
+                  onChange={(e) => setCylOs(e.target.value)}
+                  placeholder="Cylinder"
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Axis</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="180"
+                  value={axisOs}
+                  onChange={(e) => setAxisOs(e.target.value)}
+                  placeholder="Axis"
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Add.</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={addOs}
+                  onChange={(e) => setAddOs(e.target.value)}
+                  placeholder="Addition"
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">VA</label>
+                <input
+                  type="text"
+                  value={vaOs}
+                  onChange={(e) => setVaOs(e.target.value)}
+                  placeholder="e.g. 6/12, N8"
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Prism Bases</label>
+                <input
+                  type="text"
+                  value={prismBasesOs}
+                  onChange={(e) => setPrismBasesOs(e.target.value)}
+                  placeholder="e.g. 6/12, N8"
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="flex gap-3 pt-4">

@@ -35,7 +35,19 @@ const OrderDetail = () => {
     patient_rx: '',
     due_date: '',
     status: 'Open',
-    order_type: 'Stock'
+    order_type: 'Stock',
+    sph_od: null as number | null,
+    cyl_od: null as number | null,
+    axis_od: null as number | null,
+    add_od: null as number | null,
+    va_od: '' as string,
+    prism_bases_od: '' as string,
+    sph_os: null as number | null,
+    cyl_os: null as number | null,
+    axis_os: null as number | null,
+    add_os: null as number | null,
+    va_os: '' as string,
+    prism_bases_os: '' as string
   });
 
   useEffect(() => {
@@ -51,7 +63,19 @@ const OrderDetail = () => {
         patient_rx: response.data.patient_rx || '',
         due_date: response.data.due_date.split('T')[0],
         status: response.data.status,
-        order_type: response.data.order_type ?? 'Stock'
+        order_type: response.data.order_type ?? 'Stock',
+        sph_od: response.data.sph_od ?? null,
+        cyl_od: response.data.cyl_od ?? null,
+        axis_od: response.data.axis_od ?? null,
+        add_od: response.data.add_od ?? null,
+        va_od: response.data.va_od ?? '',
+        prism_bases_od: response.data.prism_bases_od ?? '',
+        sph_os: response.data.sph_os ?? null,
+        cyl_os: response.data.cyl_os ?? null,
+        axis_os: response.data.axis_os ?? null,
+        add_os: response.data.add_os ?? null,
+        va_os: response.data.va_os ?? '',
+        prism_bases_os: response.data.prism_bases_os ?? ''
       });
     } catch (error) {
       console.error('Error fetching order:', error);
@@ -203,7 +227,149 @@ const OrderDetail = () => {
                   </select>
                 </div>
               </div>
-              <div className="flex gap-3">
+
+              <div className="border-t border-gray-300 pt-4">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Prescription - OD (Right Eye)</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Sph</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.sph_od ?? ''}
+                      onChange={(e) => setFormData({ ...formData, sph_od: e.target.value ? parseFloat(e.target.value) : null })}
+                      placeholder="Sphere"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Cyl</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.cyl_od ?? ''}
+                      onChange={(e) => setFormData({ ...formData, cyl_od: e.target.value ? parseFloat(e.target.value) : null })}
+                      placeholder="Cylinder"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Axis</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="180"
+                      value={formData.axis_od ?? ''}
+                      onChange={(e) => setFormData({ ...formData, axis_od: e.target.value ? parseInt(e.target.value) : null })}
+                      placeholder="Axis"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Add.</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.add_od ?? ''}
+                      onChange={(e) => setFormData({ ...formData, add_od: e.target.value ? parseFloat(e.target.value) : null })}
+                      placeholder="Addition"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">VA</label>
+                    <input
+                      type="text"
+                      value={formData.va_od}
+                      onChange={(e) => setFormData({ ...formData, va_od: e.target.value })}
+                      placeholder="e.g. 6/12"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Prism Bases</label>
+                    <input
+                      type="text"
+                      value={formData.prism_bases_od}
+                      onChange={(e) => setFormData({ ...formData, prism_bases_od: e.target.value })}
+                      placeholder="e.g. 6/12, N8"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-300 pt-4">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Prescription - OS (Left Eye)</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Sph</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.sph_os ?? ''}
+                      onChange={(e) => setFormData({ ...formData, sph_os: e.target.value ? parseFloat(e.target.value) : null })}
+                      placeholder="Sphere"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Cyl</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.cyl_os ?? ''}
+                      onChange={(e) => setFormData({ ...formData, cyl_os: e.target.value ? parseFloat(e.target.value) : null })}
+                      placeholder="Cylinder"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Axis</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="180"
+                      value={formData.axis_os ?? ''}
+                      onChange={(e) => setFormData({ ...formData, axis_os: e.target.value ? parseInt(e.target.value) : null })}
+                      placeholder="Axis"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Add.</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.add_os ?? ''}
+                      onChange={(e) => setFormData({ ...formData, add_os: e.target.value ? parseFloat(e.target.value) : null })}
+                      placeholder="Addition"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">VA</label>
+                    <input
+                      type="text"
+                      value={formData.va_os}
+                      onChange={(e) => setFormData({ ...formData, va_os: e.target.value })}
+                      placeholder="e.g. 6/12"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Prism Bases</label>
+                    <input
+                      type="text"
+                      value={formData.prism_bases_os}
+                      onChange={(e) => setFormData({ ...formData, prism_bases_os: e.target.value })}
+                      placeholder="e.g. 6/12, N8"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
                   className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
@@ -219,14 +385,25 @@ const OrderDetail = () => {
                       patient_rx: order.patient_rx || '',
                       due_date: order.due_date.split('T')[0],
                       status: order.status,
-                      order_type: order.order_type ?? 'Stock'
+                      order_type: order.order_type ?? 'Stock',
+                      sph_od: order.sph_od ?? null,
+                      cyl_od: order.cyl_od ?? null,
+                      axis_od: order.axis_od ?? null,
+                      add_od: order.add_od ?? null,
+                      va_od: order.va_od ?? '',
+                      prism_bases_od: order.prism_bases_od ?? '',
+                      sph_os: order.sph_os ?? null,
+                      cyl_os: order.cyl_os ?? null,
+                      axis_os: order.axis_os ?? null,
+                      add_os: order.add_os ?? null,
+                      va_os: order.va_os ?? '',
+                      prism_bases_os: order.prism_bases_os ?? ''
                     });
                   }}
                   className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300"
                 >
                   Cancel
                 </button>
-              </div>
             </form>
           ) : (
             <div className="space-y-4">
@@ -257,9 +434,97 @@ const OrderDetail = () => {
               <div>
                 <span className="text-sm font-medium text-gray-500">Date Created:</span>
                 <p className="text-gray-900">
-                  {format(new Date(order.date_created), 'MMM dd, yyyy HH:mm')}
+                  {format(new Date(order.date_created), 'MMm dd, yyyy HH:mm')}
                 </p>
               </div>
+
+              {(order.sph_od !== null || order.cyl_od !== null || order.sph_os !== null || order.cyl_os !== null) && (
+                <>
+                  <div className="border-t border-gray-300 pt-4 mt-4">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Prescription - OD (Right Eye)</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {order.sph_od !== null && (
+                        <div>
+                          <span className="text-xs font-medium text-gray-500">Sph:</span>
+                          <p className="text-lg text-gray-900">{order.sph_od}</p>
+                        </div>
+                      )}
+                      {order.cyl_od !== null && (
+                        <div>
+                          <span className="text-xs font-medium text-gray-500">Cyl:</span>
+                          <p className="text-lg text-gray-900">{order.cyl_od}</p>
+                        </div>
+                      )}
+                      {order.axis_od !== null && (
+                        <div>
+                          <span className="text-xs font-medium text-gray-500">Axis:</span>
+                          <p className="text-lg text-gray-900">{order.axis_od}</p>
+                        </div>
+                      )}
+                      {order.add_od !== null && (
+                        <div>
+                          <span className="text-xs font-medium text-gray-500">Add:</span>
+                          <p className="text-lg text-gray-900">{order.add_od}</p>
+                        </div>
+                      )}
+                      {order.va_od && (
+                        <div>
+                          <span className="text-xs font-medium text-gray-500">VA:</span>
+                          <p className="text-lg text-gray-900">{order.va_od}</p>
+                        </div>
+                      )}
+                      {order.prism_bases_od && (
+                        <div>
+                          <span className="text-xs font-medium text-gray-500">Prism Bases:</span>
+                          <p className="text-lg text-gray-900">{order.prism_bases_od}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-300 pt-4 mt-4">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Prescription - OS (Left Eye)</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {order.sph_os !== null && (
+                        <div>
+                          <span className="text-xs font-medium text-gray-500">Sph:</span>
+                          <p className="text-lg text-gray-900">{order.sph_os}</p>
+                        </div>
+                      )}
+                      {order.cyl_os !== null && (
+                        <div>
+                          <span className="text-xs font-medium text-gray-500">Cyl:</span>
+                          <p className="text-lg text-gray-900">{order.cyl_os}</p>
+                        </div>
+                      )}
+                      {order.axis_os !== null && (
+                        <div>
+                          <span className="text-xs font-medium text-gray-500">Axis:</span>
+                          <p className="text-lg text-gray-900">{order.axis_os}</p>
+                        </div>
+                      )}
+                      {order.add_os !== null && (
+                        <div>
+                          <span className="text-xs font-medium text-gray-500">Add:</span>
+                          <p className="text-lg text-gray-900">{order.add_os}</p>
+                        </div>
+                      )}
+                      {order.va_os && (
+                        <div>
+                          <span className="text-xs font-medium text-gray-500">VA:</span>
+                          <p className="text-lg text-gray-900">{order.va_os}</p>
+                        </div>
+                      )}
+                      {order.prism_bases_os && (
+                        <div>
+                          <span className="text-xs font-medium text-gray-500">Prism Bases:</span>
+                          <p className="text-lg text-gray-900">{order.prism_bases_os}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>

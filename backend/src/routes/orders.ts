@@ -91,7 +91,26 @@ const ORDER_TYPES = ['Stock', 'Purchase', 'Special'];
 // Create order
 router.post('/', async (req: AuthRequest, res) => {
   try {
-    const { patient_name, patient_rx, due_date, status, order_type } = req.body;
+    const { 
+      patient_name, 
+      patient_rx, 
+      due_date, 
+      status, 
+      order_type,
+      sph_od,
+      cyl_od,
+      axis_od,
+      add_od,
+      va_od,
+      prism_bases_od,
+      sph_os,
+      cyl_os,
+      axis_os,
+      add_os,
+      va_os,
+      prism_bases_os
+    } = req.body;
+    
     const type = order_type && ORDER_TYPES.includes(order_type) ? order_type : 'Stock';
 
     if (!patient_name || !due_date) {
@@ -99,10 +118,33 @@ router.post('/', async (req: AuthRequest, res) => {
     }
 
     const result = await dbRun(
-      `INSERT INTO orders (patient_name, patient_rx, due_date, status, order_type, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO orders (
+        patient_name, patient_rx, due_date, status, order_type, created_by,
+        sph_od, cyl_od, axis_od, add_od, va_od, prism_bases_od,
+        sph_os, cyl_os, axis_os, add_os, va_os, prism_bases_os
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
        RETURNING id`,
-      [patient_name, patient_rx || '', due_date, status || 'Open', type, req.userId]
+      [
+        patient_name, 
+        patient_rx || '', 
+        due_date, 
+        status || 'Open', 
+        type, 
+        req.userId,
+        sph_od || null,
+        cyl_od || null,
+        axis_od || null,
+        add_od || null,
+        va_od || null,
+        prism_bases_od || null,
+        sph_os || null,
+        cyl_os || null,
+        axis_os || null,
+        add_os || null,
+        va_os || null,
+        prism_bases_os || null
+      ]
     );
 
     // Log creation in history
@@ -123,7 +165,25 @@ router.post('/', async (req: AuthRequest, res) => {
 // Update order
 router.put('/:id', async (req: AuthRequest, res) => {
   try {
-    const { patient_name, patient_rx, due_date, status, order_type } = req.body;
+    const { 
+      patient_name, 
+      patient_rx, 
+      due_date, 
+      status, 
+      order_type,
+      sph_od,
+      cyl_od,
+      axis_od,
+      add_od,
+      va_od,
+      prism_bases_od,
+      sph_os,
+      cyl_os,
+      axis_os,
+      add_os,
+      va_os,
+      prism_bases_os
+    } = req.body;
     const orderId = req.params.id;
 
     // Get current order
@@ -140,7 +200,9 @@ router.put('/:id', async (req: AuthRequest, res) => {
     // Update order
     await dbRun(
       `UPDATE orders 
-       SET patient_name = $1, patient_rx = $2, due_date = $3, status = $4, order_type = $5
+       SET patient_name = $1, patient_rx = $2, due_date = $3, status = $4, order_type = $5,
+           sph_od = $7, cyl_od = $8, axis_od = $9, add_od = $10, va_od = $11, prism_bases_od = $12,
+           sph_os = $13, cyl_os = $14, axis_os = $15, add_os = $16, va_os = $17, prism_bases_os = $18
        WHERE id = $6`,
       [
         patient_name || currentOrder.patient_name,
@@ -148,7 +210,19 @@ router.put('/:id', async (req: AuthRequest, res) => {
         due_date || currentOrder.due_date,
         status !== undefined ? status : currentOrder.status,
         newOrderType,
-        orderId
+        orderId,
+        sph_od !== undefined ? sph_od : currentOrder.sph_od,
+        cyl_od !== undefined ? cyl_od : currentOrder.cyl_od,
+        axis_od !== undefined ? axis_od : currentOrder.axis_od,
+        add_od !== undefined ? add_od : currentOrder.add_od,
+        va_od !== undefined ? va_od : currentOrder.va_od,
+        prism_bases_od !== undefined ? prism_bases_od : currentOrder.prism_bases_od,
+        sph_os !== undefined ? sph_os : currentOrder.sph_os,
+        cyl_os !== undefined ? cyl_os : currentOrder.cyl_os,
+        axis_os !== undefined ? axis_os : currentOrder.axis_os,
+        add_os !== undefined ? add_os : currentOrder.add_os,
+        va_os !== undefined ? va_os : currentOrder.va_os,
+        prism_bases_os !== undefined ? prism_bases_os : currentOrder.prism_bases_os
       ]
     );
 
@@ -183,6 +257,35 @@ router.put('/:id', async (req: AuthRequest, res) => {
          VALUES ($1, $2, $3, $4, $5)`,
         [orderId, req.userId, 'order_type', currentOrder.order_type ?? 'Stock', newOrderType]
       );
+    }
+
+    // Log prescription field changes
+    const prescriptionFields = [
+      { dbCol: 'sph_od', displayName: 'Sph (OD)' },
+      { dbCol: 'cyl_od', displayName: 'Cyl (OD)' },
+      { dbCol: 'axis_od', displayName: 'Axis (OD)' },
+      { dbCol: 'add_od', displayName: 'Add (OD)' },
+      { dbCol: 'va_od', displayName: 'VA (OD)' },
+      { dbCol: 'prism_bases_od', displayName: 'Prism Bases (OD)' },
+      { dbCol: 'sph_os', displayName: 'Sph (OS)' },
+      { dbCol: 'cyl_os', displayName: 'Cyl (OS)' },
+      { dbCol: 'axis_os', displayName: 'Axis (OS)' },
+      { dbCol: 'add_os', displayName: 'Add (OS)' },
+      { dbCol: 'va_os', displayName: 'VA (OS)' },
+      { dbCol: 'prism_bases_os', displayName: 'Prism Bases (OS)' }
+    ];
+
+    const valueMap = { sph_od, cyl_od, axis_od, add_od, va_od, prism_bases_od, sph_os, cyl_os, axis_os, add_os, va_os, prism_bases_os };
+    
+    for (const field of prescriptionFields) {
+      const newVal = valueMap[field.dbCol as keyof typeof valueMap];
+      if (newVal !== undefined && newVal !== currentOrder[field.dbCol as keyof typeof currentOrder]) {
+        await dbRun(
+          `INSERT INTO order_history (order_id, user_id, field_name, old_value, new_value)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [orderId, req.userId, field.displayName, currentOrder[field.dbCol as keyof typeof currentOrder]?.toString() || null, newVal?.toString() || null]
+        );
+      }
     }
 
     const updatedOrder = await dbGet('SELECT * FROM orders WHERE id = $1', [orderId]);

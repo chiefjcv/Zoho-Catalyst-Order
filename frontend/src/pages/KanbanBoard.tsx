@@ -34,6 +34,18 @@ export interface Order {
   date_created: string;
   due_date: string;
   created_by_name?: string;
+  sph_od?: number;
+  cyl_od?: number;
+  axis_od?: number;
+  add_od?: number;
+  va_od?: string;
+  prism_bases_od?: string;
+  sph_os?: number;
+  cyl_os?: number;
+  axis_os?: number;
+  add_os?: number;
+  va_os?: string;
+  prism_bases_os?: string;
   comments?: OrderComment[];
   history?: OrderHistoryItem[];
 }

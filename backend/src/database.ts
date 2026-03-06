@@ -58,7 +58,19 @@ export const initDatabase = async () => {
       order_type TEXT NOT NULL DEFAULT 'Stock',
       date_created TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       due_date TIMESTAMPTZ NOT NULL,
-      created_by BIGINT REFERENCES users(id)
+      created_by BIGINT REFERENCES users(id),
+      sph_od NUMERIC,
+      cyl_od NUMERIC,
+      axis_od INTEGER,
+      add_od NUMERIC,
+      va_od TEXT,
+      prism_bases_od TEXT,
+      sph_os NUMERIC,
+      cyl_os NUMERIC,
+      axis_os INTEGER,
+      add_os NUMERIC,
+      va_os TEXT,
+      prism_bases_os TEXT
     );
   `);
 
@@ -66,6 +78,21 @@ export const initDatabase = async () => {
   await pool.query(`
     DO $$ BEGIN
       ALTER TABLE orders ADD COLUMN order_type TEXT DEFAULT 'Stock';
+    EXCEPTION WHEN duplicate_column THEN NULL; END $$;
+
+    DO $$ BEGIN
+      ALTER TABLE orders ADD COLUMN sph_od NUMERIC;
+      ALTER TABLE orders ADD COLUMN cyl_od NUMERIC;
+      ALTER TABLE orders ADD COLUMN axis_od INTEGER;
+      ALTER TABLE orders ADD COLUMN add_od NUMERIC;
+      ALTER TABLE orders ADD COLUMN va_od TEXT;
+      ALTER TABLE orders ADD COLUMN prism_bases_od TEXT;
+      ALTER TABLE orders ADD COLUMN sph_os NUMERIC;
+      ALTER TABLE orders ADD COLUMN cyl_os NUMERIC;
+      ALTER TABLE orders ADD COLUMN axis_os INTEGER;
+      ALTER TABLE orders ADD COLUMN add_os NUMERIC;
+      ALTER TABLE orders ADD COLUMN va_os TEXT;
+      ALTER TABLE orders ADD COLUMN prism_bases_os TEXT;
     EXCEPTION WHEN duplicate_column THEN NULL; END $$;
 
     CREATE TABLE IF NOT EXISTS comments (
