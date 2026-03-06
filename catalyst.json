@@ -1,0 +1,59 @@
+{
+  "version": "1.0",
+  "projectName": "optical-shop-orders",
+  "projectDescription": "Order management system for optical shop - Full Stack Application",
+  "projectType": "nodejs",
+  "serverless": false,
+  "services": [
+    {
+      "name": "backend",
+      "type": "nodejs",
+      "path": "/backend",
+      "runtime": "nodejs:18",
+      "buildCommand": "npm install && npm run build",
+      "startCommand": "npm start",
+      "port": 5000,
+      "environment": {
+        "NODE_ENV": "production",
+        "PORT": "5000"
+      },
+      "resources": {
+        "memory": "512MB",
+        "cpu": "0.5"
+      }
+    },
+    {
+      "name": "frontend",
+      "type": "react",
+      "path": "/frontend",
+      "runtime": "nodejs:18",
+      "buildCommand": "npm install && npm run build",
+      "outputDirectory": "dist",
+      "port": 3000,
+      "resources": {
+        "memory": "256MB",
+        "cpu": "0.25"
+      }
+    }
+  ],
+  "gateway": {
+    "routes": [
+      {
+        "path": "/api/*",
+        "service": "backend",
+        "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"]
+      },
+      {
+        "path": "/*",
+        "service": "frontend",
+        "methods": ["GET"]
+      }
+    ]
+  },
+  "environment": {
+    "DATABASE_URL": "${DATABASE_URL}",
+    "JWT_SECRET": "${JWT_SECRET}",
+    "DATABASE_SSL": "true",
+    "NODE_ENV": "production"
+  }
+}

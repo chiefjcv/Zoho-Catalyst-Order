@@ -7,3 +7,10 @@ backend/data/
 frontend/dist/
 frontend/.vite/
 
+# Zoho Catalyst
+.catalyst-env
+catalyst-deploy/
+catalyst-logs/
+deployment-logs/
+.catalyst/
+
