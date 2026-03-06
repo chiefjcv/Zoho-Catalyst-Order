@@ -1,21 +1,22 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { dbGet, dbRun } from '../database.js';
+import { dbGetByColumn, dbRun } from '../database.js';
 
 const router = express.Router();
 
 // Register
-router.post('/register', async (req, res) => {
+router.post('/register', async (req: any, res) => {
   try {
     const { email, password, name } = req.body;
+    const app = req.zcatalystApp;
 
     if (!email || !password || !name) {
       return res.status(400).json({ error: 'Email, password, and name are required' });
     }
 
     // Check if user exists
-    const existingUser = await dbGet('SELECT * FROM users WHERE email = $1', [email]);
+    const existingUser = await dbGetByColumn(app, 'users', 'email', email);
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
@@ -24,10 +25,11 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user
-    const result = await dbRun(
-      'INSERT INTO users (email, password, name) VALUES ($1, $2, $3) RETURNING id',
-      [email, hashedPassword, name]
-    );
+    const result = await dbRun(app, 'users', {
+      email,
+      password: hashedPassword,
+      name
+    });
 
     // Generate token
     const secret = process.env.JWT_SECRET || 'your-secret-key';
@@ -52,16 +54,17 @@ router.post('/register', async (req, res) => {
 });
 
 // Login
-router.post('/login', async (req, res) => {
+router.post('/login', async (req: any, res) => {
   try {
     const { email, password } = req.body;
+    const app = req.zcatalystApp;
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
     // Find user
-    const user = await dbGet('SELECT * FROM users WHERE email = $1', [email]);
+    const user = await dbGetByColumn(app, 'users', 'email', email);
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }

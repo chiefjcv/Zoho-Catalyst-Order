@@ -1,33 +1,31 @@
 import express from 'express';
 import { AuthRequest } from '../middleware/auth.js';
-import { dbGet, dbAll, dbRun } from '../database.js';
+import { dbAll, dbGetByColumn, dbRun, dbUpdate, dbDelete } from '../database.js';
 
 const router = express.Router();
+
+const ORDER_TYPES = ['Stock', 'Purchase', 'Special'];
 
 // Get all orders
 router.get('/', async (req: AuthRequest, res) => {
   try {
-    const orders = await dbAll(`
-      SELECT 
-        o.*,
-        u.name as created_by_name
-      FROM orders o
-      LEFT JOIN users u ON o.created_by = u.id
+    const app = req.zcatalystApp;
+    const orders = await dbAll(app, `
+      SELECT o.*, u.name as created_by_name 
+      FROM orders o 
+      LEFT JOIN users u ON o.created_by = u.id 
       ORDER BY o.date_created DESC
     `);
 
     // Get comments for each order
     for (const order of orders) {
-      const comments = await dbAll(`
-        SELECT 
-          c.*,
-          u.name as user_name
-        FROM comments c
-        JOIN users u ON c.user_id = u.id
-        WHERE c.order_id = $1
+      const comments = await dbAll(app, `
+        SELECT c.*, u.name as user_name 
+        FROM comments c 
+        JOIN users u ON c.user_id = u.id 
+        WHERE c.order_id = ${order.id} 
         ORDER BY c.created_at DESC
-      `, [order.id]);
-
+      `);
       order.comments = comments;
     }
 
@@ -41,40 +39,38 @@ router.get('/', async (req: AuthRequest, res) => {
 // Get single order
 router.get('/:id', async (req: AuthRequest, res) => {
   try {
-    const order = await dbGet(`
-      SELECT 
-        o.*,
-        u.name as created_by_name
-      FROM orders o
-      LEFT JOIN users u ON o.created_by = u.id
-      WHERE o.id = $1
-    `, [req.params.id]);
+    const app = req.zcatalystApp;
+    const orderId = req.params.id;
 
+    const orders = await dbAll(app, `
+      SELECT o.*, u.name as created_by_name 
+      FROM orders o 
+      LEFT JOIN users u ON o.created_by = u.id 
+      WHERE o.id = ${orderId}
+    `);
+
+    const order = orders[0];
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
 
     // Get comments
-    const comments = await dbAll(`
-      SELECT 
-        c.*,
-        u.name as user_name
-      FROM comments c
-      JOIN users u ON c.user_id = u.id
-      WHERE c.order_id = $1
+    const comments = await dbAll(app, `
+      SELECT c.*, u.name as user_name 
+      FROM comments c 
+      JOIN users u ON c.user_id = u.id 
+      WHERE c.order_id = ${orderId}
       ORDER BY c.created_at DESC
-    `, [order.id]);
+    `);
 
     // Get history
-    const history = await dbAll(`
-      SELECT 
-        h.*,
-        u.name as user_name
-      FROM order_history h
-      JOIN users u ON h.user_id = u.id
-      WHERE h.order_id = $1
+    const history = await dbAll(app, `
+      SELECT h.*, u.name as user_name 
+      FROM order_history h 
+      JOIN users u ON h.user_id = u.id 
+      WHERE h.order_id = ${orderId}
       ORDER BY h.created_at DESC
-    `, [order.id]);
+    `);
 
     order.comments = comments;
     order.history = history;
@@ -86,15 +82,14 @@ router.get('/:id', async (req: AuthRequest, res) => {
   }
 });
 
-const ORDER_TYPES = ['Stock', 'Purchase', 'Special'];
-
 // Create order
 router.post('/', async (req: AuthRequest, res) => {
   try {
-    const { 
-      patient_name, 
-      due_date, 
-      status, 
+    const app = req.zcatalystApp;
+    const {
+      patient_name,
+      due_date,
+      status,
       order_type,
       sph_od,
       cyl_od,
@@ -109,51 +104,44 @@ router.post('/', async (req: AuthRequest, res) => {
       va_os,
       prism_bases_os
     } = req.body;
-    
+
     const type = order_type && ORDER_TYPES.includes(order_type) ? order_type : 'Stock';
 
     if (!patient_name || !due_date) {
       return res.status(400).json({ error: 'Patient name and due date are required' });
     }
 
-    const result = await dbRun(
-      `INSERT INTO orders (
-        patient_name, due_date, status, order_type, created_by,
-        sph_od, cyl_od, axis_od, add_od, va_od, prism_bases_od,
-        sph_os, cyl_os, axis_os, add_os, va_os, prism_bases_os
-       )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
-       RETURNING id`,
-      [
-        patient_name, 
-        due_date, 
-        status || 'Open', 
-        type, 
-        req.userId,
-        sph_od || null,
-        cyl_od || null,
-        axis_od || null,
-        add_od || null,
-        va_od || null,
-        prism_bases_od || null,
-        sph_os || null,
-        cyl_os || null,
-        axis_os || null,
-        add_os || null,
-        va_os || null,
-        prism_bases_os || null
-      ]
-    );
+    const result = await dbRun(app, 'orders', {
+      patient_name,
+      due_date,
+      status: status || 'Open',
+      order_type: type,
+      created_by: req.userId,
+      sph_od: sph_od || null,
+      cyl_od: cyl_od || null,
+      axis_od: axis_od || null,
+      add_od: add_od || null,
+      va_od: va_od || null,
+      prism_bases_od: prism_bases_od || null,
+      sph_os: sph_os || null,
+      cyl_os: cyl_os || null,
+      axis_os: axis_os || null,
+      add_os: add_os || null,
+      va_os: va_os || null,
+      prism_bases_os: prism_bases_os || null
+    });
 
     // Log creation in history
-    await dbRun(
-      `INSERT INTO order_history (order_id, user_id, field_name, old_value, new_value)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [result.lastID, req.userId, 'status', null, status || 'Open']
-    );
+    await dbRun(app, 'order_history', {
+      order_id: result.lastID,
+      user_id: req.userId,
+      field_name: 'status',
+      old_value: null,
+      new_value: status || 'Open'
+    });
 
-    const order = await dbGet('SELECT * FROM orders WHERE id = $1', [result.lastID]);
-    res.status(201).json(order);
+    const orders = await dbAll(app, `SELECT * FROM orders WHERE id = ${result.lastID}`);
+    res.status(201).json(orders[0]);
   } catch (error: any) {
     console.error('Create order error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -163,10 +151,11 @@ router.post('/', async (req: AuthRequest, res) => {
 // Update order
 router.put('/:id', async (req: AuthRequest, res) => {
   try {
-    const { 
-      patient_name, 
-      due_date, 
-      status, 
+    const app = req.zcatalystApp;
+    const {
+      patient_name,
+      due_date,
+      status,
       order_type,
       sph_od,
       cyl_od,
@@ -184,7 +173,8 @@ router.put('/:id', async (req: AuthRequest, res) => {
     const orderId = req.params.id;
 
     // Get current order
-    const currentOrder = await dbGet('SELECT * FROM orders WHERE id = $1', [orderId]);
+    const currentOrders = await dbAll(app, `SELECT * FROM orders WHERE id = ${orderId}`);
+    const currentOrder = currentOrders[0];
     if (!currentOrder) {
       return res.status(404).json({ error: 'Order not found' });
     }
@@ -194,65 +184,67 @@ router.put('/:id', async (req: AuthRequest, res) => {
         ? order_type
         : (currentOrder.order_type ?? 'Stock');
 
+    // Prepare update data
+    const updateData: any = {};
+    if (patient_name !== undefined) updateData.patient_name = patient_name;
+    if (due_date !== undefined) updateData.due_date = due_date;
+    if (status !== undefined) updateData.status = status;
+    updateData.order_type = newOrderType;
+    if (sph_od !== undefined) updateData.sph_od = sph_od;
+    if (cyl_od !== undefined) updateData.cyl_od = cyl_od;
+    if (axis_od !== undefined) updateData.axis_od = axis_od;
+    if (add_od !== undefined) updateData.add_od = add_od;
+    if (va_od !== undefined) updateData.va_od = va_od;
+    if (prism_bases_od !== undefined) updateData.prism_bases_od = prism_bases_od;
+    if (sph_os !== undefined) updateData.sph_os = sph_os;
+    if (cyl_os !== undefined) updateData.cyl_os = cyl_os;
+    if (axis_os !== undefined) updateData.axis_os = axis_os;
+    if (add_os !== undefined) updateData.add_os = add_os;
+    if (va_os !== undefined) updateData.va_os = va_os;
+    if (prism_bases_os !== undefined) updateData.prism_bases_os = prism_bases_os;
+
     // Update order
-    await dbRun(
-      `UPDATE orders 
-       SET patient_name = $1, due_date = $2, status = $3, order_type = $4,
-           sph_od = $6, cyl_od = $7, axis_od = $8, add_od = $9, va_od = $10, prism_bases_od = $11,
-           sph_os = $12, cyl_os = $13, axis_os = $14, add_os = $15, va_os = $16, prism_bases_os = $17
-       WHERE id = $5`,
-      [
-        patient_name || currentOrder.patient_name,
-        due_date || currentOrder.due_date,
-        status !== undefined ? status : currentOrder.status,
-        newOrderType,
-        orderId,
-        sph_od !== undefined ? sph_od : currentOrder.sph_od,
-        cyl_od !== undefined ? cyl_od : currentOrder.cyl_od,
-        axis_od !== undefined ? axis_od : currentOrder.axis_od,
-        add_od !== undefined ? add_od : currentOrder.add_od,
-        va_od !== undefined ? va_od : currentOrder.va_od,
-        prism_bases_od !== undefined ? prism_bases_od : currentOrder.prism_bases_od,
-        sph_os !== undefined ? sph_os : currentOrder.sph_os,
-        cyl_os !== undefined ? cyl_os : currentOrder.cyl_os,
-        axis_os !== undefined ? axis_os : currentOrder.axis_os,
-        add_os !== undefined ? add_os : currentOrder.add_os,
-        va_os !== undefined ? va_os : currentOrder.va_os,
-        prism_bases_os !== undefined ? prism_bases_os : currentOrder.prism_bases_os
-      ]
-    );
+    await dbUpdate(app, 'orders', parseInt(orderId), updateData);
 
     // Log changes in history
     if (status !== undefined && status !== currentOrder.status) {
-      await dbRun(
-        `INSERT INTO order_history (order_id, user_id, field_name, old_value, new_value)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [orderId, req.userId, 'status', currentOrder.status, status]
-      );
+      await dbRun(app, 'order_history', {
+        order_id: orderId,
+        user_id: req.userId,
+        field_name: 'status',
+        old_value: currentOrder.status,
+        new_value: status
+      });
     }
 
     if (patient_name !== undefined && patient_name !== currentOrder.patient_name) {
-      await dbRun(
-        `INSERT INTO order_history (order_id, user_id, field_name, old_value, new_value)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [orderId, req.userId, 'patient_name', currentOrder.patient_name, patient_name]
-      );
+      await dbRun(app, 'order_history', {
+        order_id: orderId,
+        user_id: req.userId,
+        field_name: 'patient_name',
+        old_value: currentOrder.patient_name,
+        new_value: patient_name
+      });
     }
 
     if (due_date !== undefined && due_date !== currentOrder.due_date) {
-      await dbRun(
-        `INSERT INTO order_history (order_id, user_id, field_name, old_value, new_value)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [orderId, req.userId, 'due_date', currentOrder.due_date, due_date]
-      );
+      await dbRun(app, 'order_history', {
+        order_id: orderId,
+        user_id: req.userId,
+        field_name: 'due_date',
+        old_value: currentOrder.due_date,
+        new_value: due_date
+      });
     }
 
     if (newOrderType !== (currentOrder.order_type ?? 'Stock')) {
-      await dbRun(
-        `INSERT INTO order_history (order_id, user_id, field_name, old_value, new_value)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [orderId, req.userId, 'order_type', currentOrder.order_type ?? 'Stock', newOrderType]
-      );
+      await dbRun(app, 'order_history', {
+        order_id: orderId,
+        user_id: req.userId,
+        field_name: 'order_type',
+        old_value: currentOrder.order_type ?? 'Stock',
+        new_value: newOrderType
+      });
     }
 
     // Log prescription field changes
@@ -272,20 +264,22 @@ router.put('/:id', async (req: AuthRequest, res) => {
     ];
 
     const valueMap = { sph_od, cyl_od, axis_od, add_od, va_od, prism_bases_od, sph_os, cyl_os, axis_os, add_os, va_os, prism_bases_os };
-    
+
     for (const field of prescriptionFields) {
       const newVal = valueMap[field.dbCol as keyof typeof valueMap];
       if (newVal !== undefined && newVal !== currentOrder[field.dbCol as keyof typeof currentOrder]) {
-        await dbRun(
-          `INSERT INTO order_history (order_id, user_id, field_name, old_value, new_value)
-           VALUES ($1, $2, $3, $4, $5)`,
-          [orderId, req.userId, field.displayName, currentOrder[field.dbCol as keyof typeof currentOrder]?.toString() || null, newVal?.toString() || null]
-        );
+        await dbRun(app, 'order_history', {
+          order_id: orderId,
+          user_id: req.userId,
+          field_name: field.displayName,
+          old_value: currentOrder[field.dbCol as keyof typeof currentOrder]?.toString() || null,
+          new_value: newVal?.toString() || null
+        });
       }
     }
 
-    const updatedOrder = await dbGet('SELECT * FROM orders WHERE id = $1', [orderId]);
-    res.json(updatedOrder);
+    const updatedOrders = await dbAll(app, `SELECT * FROM orders WHERE id = ${orderId}`);
+    res.json(updatedOrders[0]);
   } catch (error: any) {
     console.error('Update order error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -295,14 +289,15 @@ router.put('/:id', async (req: AuthRequest, res) => {
 // Delete order
 router.delete('/:id', async (req: AuthRequest, res) => {
   try {
+    const app = req.zcatalystApp;
     const orderId = req.params.id;
-    const order = await dbGet('SELECT * FROM orders WHERE id = $1', [orderId]);
 
-    if (!order) {
+    const orders = await dbAll(app, `SELECT * FROM orders WHERE id = ${orderId}`);
+    if (!orders || orders.length === 0) {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    await dbRun('DELETE FROM orders WHERE id = $1', [orderId]);
+    await dbDelete(app, 'orders', parseInt(orderId));
     res.json({ message: 'Order deleted successfully' });
   } catch (error: any) {
     console.error('Delete order error:', error);
@@ -313,6 +308,7 @@ router.delete('/:id', async (req: AuthRequest, res) => {
 // Add comment
 router.post('/:id/comments', async (req: AuthRequest, res) => {
   try {
+    const app = req.zcatalystApp;
     const { comment } = req.body;
     const orderId = req.params.id;
 
@@ -320,26 +316,25 @@ router.post('/:id/comments', async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Comment is required' });
     }
 
-    const order = await dbGet('SELECT * FROM orders WHERE id = $1', [orderId]);
-    if (!order) {
+    const orders = await dbAll(app, `SELECT * FROM orders WHERE id = ${orderId}`);
+    if (!orders || orders.length === 0) {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    const result = await dbRun(
-      'INSERT INTO comments (order_id, user_id, comment) VALUES ($1, $2, $3) RETURNING id',
-      [orderId, req.userId, comment]
-    );
+    const result = await dbRun(app, 'comments', {
+      order_id: orderId,
+      user_id: req.userId,
+      comment
+    });
 
-    const newComment = await dbGet(`
-      SELECT 
-        c.*,
-        u.name as user_name
-      FROM comments c
-      JOIN users u ON c.user_id = u.id
-      WHERE c.id = $1
-    `, [result.lastID]);
+    const comments = await dbAll(app, `
+      SELECT c.*, u.name as user_name 
+      FROM comments c 
+      JOIN users u ON c.user_id = u.id 
+      WHERE c.id = ${result.lastID}
+    `);
 
-    res.status(201).json(newComment);
+    res.status(201).json(comments[0]);
   } catch (error: any) {
     console.error('Add comment error:', error);
     res.status(500).json({ error: 'Internal server error' });

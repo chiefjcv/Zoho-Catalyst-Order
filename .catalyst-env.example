@@ -1,15 +1,54 @@
-# Zoho Catalyst Environment Variables
-# Copy this file to .catalyst-env and fill in your actual values
-
-# Database Configuration
-DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DATABASE_NAME
-DATABASE_SSL=true
+# Zoho Catalyst Environment Variables for Catalyst Data Store
+# Note: Database connection managed through Catalyst console
 
 # Authentication
 JWT_SECRET=replace-with-a-long-random-string-min-32-characters
 
-# Node Environment
+# Application Environment
 NODE_ENV=production
-
-# Application Port
 PORT=5000
+
+# Required Tables in Catalyst Data Store:
+# 1. users
+#    - id (Auto ID)
+#    - email (Text, Unique)
+#    - password (Text)
+#    - name (Text)
+#    - created_at (DateTime)
+#
+# 2. orders
+#    - id (Auto ID)
+#    - patient_name (Text)
+#    - status (Text)
+#    - order_type (Text)
+#    - date_created (DateTime)
+#    - due_date (DateTime)
+#    - created_by (Number)
+#    - sph_od (Decimal)
+#    - cyl_od (Decimal)
+#    - axis_od (Number)
+#    - add_od (Decimal)
+#    - va_od (Text)
+#    - prism_bases_od (Text)
+#    - sph_os (Decimal)
+#    - cyl_os (Decimal)
+#    - axis_os (Number)
+#    - add_os (Decimal)
+#    - va_os (Text)
+#    - prism_bases_os (Text)
+#
+# 3. comments
+#    - id (Auto ID)
+#    - order_id (Number)
+#    - user_id (Number)
+#    - comment (Text)
+#    - created_at (DateTime)
+#
+# 4. order_history
+#    - id (Auto ID)
+#    - order_id (Number)
+#    - user_id (Number)
+#    - field_name (Text)
+#    - old_value (Text)
+#    - new_value (Text)
+#    - created_at (DateTime)
