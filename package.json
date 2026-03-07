@@ -7,9 +7,7 @@
     "server": "cd backend && npm run dev",
     "client": "cd frontend && npm run dev",
     "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
-    "build": "npm install && cd backend && npm install && npm run build && cd ../frontend && npm install && npm run build",
-    "build:backend": "cd backend && npm install && npm run build",
-    "build:frontend": "cd frontend && npm install && npm run build",
+    "build": "sh build.sh",
     "start": "node backend/dist/index.js"
   },
   "devDependencies": {
